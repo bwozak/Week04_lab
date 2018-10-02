@@ -6,8 +6,8 @@
 package servlets;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,31 +23,50 @@ public class LoginServlet extends HttpServlet {
 @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession();
         
+        Cookie[] storeCookies = request.getCookies();
         
-        getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
+        for(int i = 0; i < storeCookies.length; i++) {
+            
+            if(storeCookies[i].getName().equals("username")) {
+                request.setAttribute("username", storeCookies[i].getValue());
+            request.setAttribute("rememberMe", "checked");
+            } else {
+                response.sendRedirect("home");
+                }
+            
+            request.getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
+        } 
     }
     
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
 
-        UserService userService = new UserService();
+        UserService user = new UserService();
+        HttpSession session = request.getSession();
         
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         
         
-        if (username != null && username != "" && password != null && password != "") {
-            getServletContext().getRequestDispatcher("/WEB-INF/home.jsp").forward(request, response);
-        }
-        else {
-            request.setAttribute("message", "Please enter valid credentials");
+        if (username == null || password == null) {
+                request.setAttribute("message", "Invalid entry, please try again");
+                getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
+        } else {
+           session.setAttribute("username", username);
+           if(request.getParameter("remembeMe") != null) {
+               Cookie cookie = new Cookie("username", username);
+               response.addCookie(cookie);
+           } 
+//           else {
+//               for(Cookie c : cookie){
+//                   c.setMaxAge(0);
+//                   response.addCookie(c);   
+//               }
         }
         
         getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
         
     }
-
 }

@@ -15,7 +15,7 @@
     <body>
         <h1>Remember Me Log In Page</h1>
         
-        <form  method="post">
+        <form action="login" method="post">
             Username: <input type="text" value="${username}" name="username"> <br>
             Password: <input type="password" value="${password}" name="password"> <br>
             
